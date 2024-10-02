@@ -1,0 +1,306 @@
+{% extends "Barra_Menu.html" %}
+
+{% block title %}Chat de Usuarios{% endblock %}
+
+{% block content %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <div class="chat-app">
+        <!-- Columna Izquierda (Lista de Chats) -->
+        <div class="chat-list-section">
+            <div class="chat-list-header">
+                <div class="profile-icon">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <h2>Chats</h2>
+            </div>
+            <div class="chat-list-body">
+                <div class="chat-list-item" onclick="openChat('CR7')">
+                    <div class="chat-item-photo">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="chat-item-details">
+                        <h4>CR7</h4>
+                        <p>Messi mi papá...</p>
+                    </div>
+                </div>
+                <div class="chat-list-item" onclick="openChat('Messi')">
+                    <div class="chat-item-photo">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="chat-item-details">
+                        <h4>Messi</h4>
+                        <p>yo soy el goat pa...</p>
+                    </div>
+                </div>
+                <!-- Repetir para otros chats -->
+            </div>
+        </div>
+
+        <!-- Columna Derecha (Chat Activo) -->
+        <div class="chat-section">
+            <div class="chat-container">
+                <div class="chat-header">
+                    <i class="fas fa-user"></i> <span id="active-chat-user">Mensajes</span>
+                </div>
+                <div class="chat-body" id="chat-body">
+                    <!-- Aquí se mostrarán los mensajes -->
+                    <div class="message bot">
+                        <div class="icon"><i class="fas fa-robot"></i></div>
+                        <div class="content">¡Hola!</div>
+                    </div>
+                </div>
+                <div class="chat-footer">
+                    <input type="text" id="message-input" placeholder="Escribe un mensaje..." autocomplete="off">
+                    <button onclick="sendMessage()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f9;
+        }
+
+        .chat-app {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+
+        /* Estilos para la Columna Izquierda (Lista de Chats) */
+        .chat-list-section {
+            width: 35%;
+            background-color: #2e3b4e;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            height: 90%;
+            margin-top: 12px;
+            
+        }
+
+        .chat-list-header {
+            padding: 20px;
+            background-color: #32465a;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-list-header .profile-icon {
+            font-size: 2.5em;
+        }
+
+        .chat-list-header h2 {
+            margin-left: 10px;
+            font-size: 1.5em;
+        }
+
+        .chat-list-body {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .chat-list-item {
+            padding: 15px;
+            border-bottom: 1px solid #465769;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .chat-list-item:hover {
+            background-color: #3b4a5c;
+        }
+
+        .chat-item-photo {
+            width: 50px;
+            height: 50px;
+            background-color: #4a90e2;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+
+        .chat-item-photo i {
+            color: white;
+            font-size: 1.5em;
+        }
+
+        .chat-item-details h4 {
+            margin: 0;
+            font-size: 1.1em;
+        }
+
+        .chat-item-details p {
+            margin: 5px 0 0;
+            font-size: 0.9em;
+            color: #d4d4d4;
+        }
+
+        /* Estilos para la Columna Derecha (Chat Activo) */
+        .chat-section {
+            flex: 1;
+            display: flex;
+            
+            align-items: center;
+            background-color: white;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 600px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            height: 90%;
+            margin-top: -40px;
+        }
+
+        .chat-header {
+            background-color: #388e3c; /* Verde oscuro */
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-header i {
+            margin-right: 10px;
+        }
+
+        .chat-body {
+            padding: 15px;
+            flex: 1;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .message.bot .content {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        .message.user .content {
+            background-color: #388e3c; /* Verde oscuro */
+            color: white;
+            margin-left: auto;
+        }
+
+        .message .content {
+            padding: 10px 15px;
+            border-radius: 20px;
+            max-width: 70%;
+            word-wrap: break-word;
+            position: relative;
+            font-size: 0.9em;
+        }
+
+        .message .icon {
+            font-size: 1.5em;
+            margin-right: 10px;
+            color: #388e3c; /* Verde oscuro */
+        }
+
+        .chat-footer {
+            padding: 15px;
+            background-color: white;
+            display: flex;
+            border-top: 1px solid #e6e6e6;
+        }
+
+        .chat-footer input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 0.9em;
+            outline: none;
+        }
+
+        .chat-footer button {
+            background-color: #388e3c; /* Verde oscuro */
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            margin-left: 10px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.3s ease;
+        }
+
+        .chat-footer button:hover {
+            background-color: #2e7d32;
+        }
+
+        .chat-footer .fa-paper-plane {
+            font-size: 1.2em;
+        }
+    </style>
+
+    <script>
+        function addMessage(type, message) {
+            const chatBody = document.getElementById("chat-body");
+            const messageElement = document.createElement("div");
+            messageElement.classList.add("message", type);
+
+            const contentElement = document.createElement("div");
+            contentElement.classList.add("content");
+            contentElement.textContent = message;
+
+            if (type === "bot") {
+                const iconElement = document.createElement("div");
+                iconElement.classList.add("icon");
+                iconElement.innerHTML = '<i class="fas fa-user"></i>';
+                messageElement.appendChild(iconElement);
+            }
+
+            messageElement.appendChild(contentElement);
+            chatBody.appendChild(messageElement);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        function sendMessage() {
+            const messageInput = document.getElementById("message-input");
+            const message = messageInput.value.trim();
+            
+            if (message !== "") {
+                addMessage("user", message);
+                addMessage("bot", "Messi es mejor que CR7 y no pienso discutirlo.");
+                
+                messageInput.value = "";
+            } 
+        }
+
+        function openChat(user) {
+            document.getElementById('active-chat-user').textContent = user;
+            // Aquí puedes cargar mensajes anteriores si lo necesitas.
+        }
+    </script>
+{% endblock %}

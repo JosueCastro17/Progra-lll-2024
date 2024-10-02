@@ -1,0 +1,229 @@
+{% extends "Barra_Menu.html" %}
+
+{% block title %}Editar Perfil{% endblock %}
+
+{% block content %}
+
+<form method="POST" action="{{ url_for('edit_profile', user_id=user.user_id) }}" enctype="multipart/form-data">
+
+    <!-- Contenedor de la imagen de fondo -->
+<div class="background-container">
+    <img id="background-image" 
+    src="{{ user.imgFondoUsuario if user.imgFondoUsuario else url_for('static', filename='imagenes/default-background.png') }}" 
+    class="background-image">
+</div>
+
+<!-- Botón para cargar nueva imagen de fondo -->
+<div class="background-upload-container">
+    <label for="background-image-upload" class="upload-background-btn">
+        <i class="fas fa-plus"></i> Cambiar Imagen de Fondo
+        <input type="file" id="background-image-upload" name="background_image" accept="image/*" style="display:none;">
+    </label>
+</div>
+
+<!-- Contenedor de la imagen de perfil -->
+<div class="profile-container">
+    <div class="profile-picture-container">
+        <img id="profile-picture" 
+        src="{{ user.imgPerfilUsuario if user.imgPerfilUsuario else url_for('static', filename='imagenes/default-profile.png') }}" 
+        class="profile-picture">
+    </div>
+
+    <!-- Botón para cargar nueva imagen de perfil -->
+    <div class="profile-upload-container">
+        <label for="profile-picture-upload" class="upload-btn">
+            <i class="fas fa-plus"></i> Cambiar Imagen de Perfil
+            <input type="file" id="profile-picture-upload" name="profile_picture" accept="image/*" style="display:none;">
+        </label>
+    </div>
+</div>
+
+    <!-- Formulario para editar datos -->
+    <div class="form-group">
+        <label for="username">Correo:</label>
+        <input type="email" id="username" name="username" value="{{ user.username }}">
+    </div>
+
+    <div class="form-group">
+        <label for="numero-telefono">Número de Teléfono:</label>
+        <input type="text" id="numero-telefono" name="NumeroTelefono" value="{{ user.NumeroTelefono }}">
+    </div>
+
+    <!-- Botón de actualizar datos -->
+    <div class="form-group">
+        <button type="submit" class="btn-update">Actualizar Datos</button>
+    </div>
+</form>
+
+<!-- Botón para regresar al perfil -->
+<a href="{{ url_for('profile') }}" class="btn-back">
+    <i class="fas fa-arrow-left"></i> Regresar al Perfil
+</a>
+
+{% if mensaje %}
+    <div class="alert alert-success">
+        {{ mensaje }}
+    </div>
+{% endif %}
+
+<!-- Incluir Font Awesome para los íconos -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<!-- Estilos CSS -->
+<style>
+    .profile-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Centra la imagen de perfil y el botón verticalmente */
+        margin-top: -145px;
+    }
+
+    .background-container {
+        width: 100%;
+        height: 300px; /* Ajuste de altura */
+        background-color: #e0e0e0; /* Color de fondo gris claro */
+        overflow: hidden;
+    }
+
+    .background-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .background-upload-container {
+        text-align: right; /* Alinea el botón a la derecha */
+        margin-top: 10px; /* Espacio entre el contenedor de la imagen y el botón */
+    }
+
+    .upload-background-btn {
+        background: #00bcd4;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 25px;
+        cursor: pointer;
+        font-size: 16px;
+        display: inline-block;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .upload-background-btn i {
+        margin-right: 8px;
+    }
+
+    .profile-picture-container {
+        background-color: #f0f0f0; /* Color de fondo gris claro */
+        padding: 15px;
+        border-radius: 50%;
+    }
+
+    .profile-picture {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        border: 5px solid white;
+        object-fit: cover;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .profile-upload-container {
+        margin-top: 10px; /* Espacio entre la imagen de perfil y el botón */
+        text-align: center;
+    }
+
+    .upload-btn {
+        background: #00bcd4;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 25px;
+        cursor: pointer;
+        font-size: 16px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        display: inline-block;
+    }
+
+    .upload-btn i {
+        margin-right: 8px;
+    }
+
+    .form-group {
+        margin-bottom: 30px;
+        margin-top:3%;
+        text-align: center;
+        display: inline-block;
+        width: 100%;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 18px;
+        width: 100%;
+       text-align: center;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 18px;
+      width: 50%;
+      text-align: center;
+    }
+
+    .btn-update {
+        background: #00bcd4;
+        color: white;
+        padding: 15px 25px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 18px;
+        
+    }
+
+    .btn-update:hover {
+        background-color: #0097a7;
+    }
+
+    .btn-back {
+        display: inline-block;
+        margin-top: 20px;
+        text-decoration: none;
+        color: #00bcd4;
+        font-size: 18px;
+        cursor: pointer;
+    }
+
+    .btn-back i {
+        margin-right: 5px;
+    }
+</style>
+
+<!-- Script JavaScript para manejar la carga de imágenes -->
+<script>
+    document.getElementById('profile-picture-upload').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('profile-picture').src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    document.getElementById('background-image-upload').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('background-image').src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+
+{% endblock %}

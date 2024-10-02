@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e0f7fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            max-width: 400px;
+            width: 100%;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            position: relative;
+        }
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .form-group button {
+            width: 100%;
+            padding: 10px;
+            background-color: #00bcd4;
+            border: none;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .form-group button:hover {
+            background-color: #0097a7;
+        }
+        .form-footer {
+            text-align: center;
+            margin-top: 15px;
+        }
+        .form-footer a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+        .error-message {
+            color: red;
+            font-size: 12px;
+            display: none;
+        }
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 38px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Registro</h2>
+        <form id="registrationForm" action="/RegistrarseLogin" method="POST">
+            <div class="form-group">
+                <label for="username">Correo:</label>
+                <input type="email" id="username" name="username" required>
+                <span class="error-message" id="emailError">El correo debe ser @gmail.com</span>
+            </div>
+            <div class="form-group">
+                <label for="password">Contraseña:</label>
+                <input type="password" id="password" name="password" required>
+                <span class="toggle-password" onclick="togglePassword('password')">👁️</span>
+                <span class="error-message" id="passwordError">La contraseña debe tener al menos 8 caracteres y no puede ser "12345678".</span>
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">Confirmar Contraseña:</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required>
+                <span class="toggle-password" onclick="togglePassword('confirmPassword')">👁️</span>
+                <span class="error-message" id="confirmPasswordError">Las contraseñas no coinciden.</span>
+            </div>
+            <div class="form-group">
+                <label for="NombreCompleto">Nombre Completo:</label>
+                <input type="text" id="NombreCompleto" name="NombreCompleto" required>
+            </div>
+            <div class="form-group">
+                <label for="NumeroTelefono">Número de Teléfono:</label>
+                <input type="text" id="NumeroTelefono" name="NumeroTelefono" required>
+                <span class="error-message" id="phoneError">El número de teléfono debe contener exactamente 8 dígitos numéricos y no contener letras.</span>
+            </div>
+            <div class="form-group">
+                <button type="submit">Registrarse</button>
+            </div>
+        </form>
+        <div class="form-footer">
+            <p>¿Ya tienes cuenta? <a href="/login">Inicia sesión aquí</a></p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('registrationForm').addEventListener('submit', function(event) {
+            const emailField = document.getElementById('username');
+            const emailValue = emailField.value;
+            const emailError = document.getElementById('emailError');
+
+            if (!emailValue.endsWith('@gmail.com')) {
+                emailError.style.display = 'block';
+                event.preventDefault();
+            } else {
+                emailError.style.display = 'none';
+            }
+
+            const passwordField = document.getElementById('password');
+            const passwordValue = passwordField.value;
+            const passwordError = document.getElementById('passwordError');
+
+            if (passwordValue.length < 8 || passwordValue === '12345678') {
+                passwordError.style.display = 'block';
+                event.preventDefault();
+            } else {
+                passwordError.style.display = 'none';
+            }
+
+            const confirmPasswordField = document.getElementById('confirmPassword');
+            const confirmPasswordValue = confirmPasswordField.value;
+            const confirmPasswordError = document.getElementById('confirmPasswordError');
+
+            if (passwordValue !== confirmPasswordValue) {
+                confirmPasswordError.style.display = 'block';
+                event.preventDefault();
+            } else {
+                confirmPasswordError.style.display = 'none';
+            }
+
+            const phoneField = document.getElementById('NumeroTelefono');
+            const phoneValue = phoneField.value;
+            const phoneError = document.getElementById('phoneError');
+
+            if (!/^\d{8}$/.test(phoneValue)) {
+                phoneError.style.display = 'block';
+                event.preventDefault();
+            } else {
+                phoneError.style.display = 'none';
+            }
+        });
+
+        document.getElementById('NumeroTelefono').addEventListener('input', function() {
+            const phoneField = document.getElementById('NumeroTelefono');
+            const phoneValue = phoneField.value;
+            const phoneError = document.getElementById('phoneError');
+
+            if (/[^0-9]/.test(phoneValue)) {
+                phoneError.textContent = 'El valor ingresado no es válido. Solo se permiten números.';
+                phoneError.style.display = 'block';
+            } else if (phoneValue.length !== 8) {
+                phoneError.textContent = 'El número de teléfono debe contener exactamente 8 dígitos numéricos.';
+                phoneError.style.display = 'block';
+            } else {
+                phoneError.style.display = 'none';
+            }
+        });
+
+        // Función para mostrar/ocultar contraseñas
+        function togglePassword(id) {
+            const field = document.getElementById(id);
+            if (field.type === 'password') {
+                field.type = 'text';
+            } else {
+                field.type = 'password';
+            }
+        }
+    </script>
+</body>
+</html>

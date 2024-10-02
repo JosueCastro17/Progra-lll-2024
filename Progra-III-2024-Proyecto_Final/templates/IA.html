@@ -1,0 +1,213 @@
+{% extends "Barra_Menu.html" %}
+
+{% block title %}IA{% endblock %}
+
+{% block content %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <div class="chat-section">
+        <div class="chat-container">
+            <div class="chat-header">
+                <i class="fas fa-robot"></i> Asistente virtual de WillyMarketSV
+            </div>
+            <div class="chat-body" id="chat-body">
+                <!-- Aquí se mostrarán los mensajes -->
+                <div class="message bot">
+                    <div class="icon"><i class="fas fa-robot"></i></div>
+                    <div class="content">¡Hola! ¿En qué puedo ayudarte hoy?</div>
+                </div>
+            </div>
+            <div class="chat-footer">
+                <input type="text" id="message-input" placeholder="Escribe un mensaje..." autocomplete="off">
+                <button onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f9;
+        }
+
+        .chat-section {
+            display: flex;
+            justify-content: flex-end; /* Alinear a la derecha */
+            align-items: center;
+            height: 100vh;
+        }
+
+        .chat-container {
+            width: 400px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            height: 90%; /* Ocupa toda la altura */
+            margin-top: -40px;
+        }
+
+        .chat-header {
+            background-color: #4a90e2;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: 600;
+            position: relative;
+        }
+
+        .chat-header .fa-robot {
+            margin-right: 10px;
+        }
+
+        .chat-body {
+            padding: 15px;
+            flex: 1;
+            overflow-y: auto; /* Permitir desplazamiento */
+            background-color: #f9f9f9;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .message.bot .content {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        .message.user .content {
+            background-color: #4a90e2;
+            color: white;
+            margin-left: auto;
+        }
+
+        .message .content {
+            padding: 10px 15px;
+            border-radius: 20px;
+            max-width: 70%;
+            word-wrap: break-word;
+            position: relative;
+            font-size: 0.9em;
+        }
+
+        .message .icon {
+            font-size: 1.5em;
+            margin-right: 10px;
+            color: #4a90e2;
+        }
+
+        .chat-footer {
+            padding: 15px;
+            background-color: white;
+            display: flex;
+            border-top: 1px solid #e6e6e6;
+        }
+
+        .chat-footer input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 0.9em;
+            outline: none;
+        }
+
+        .chat-footer button {
+            background-color: #4a90e2;
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            margin-left: 10px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.3s ease;
+        }
+
+        .chat-footer button:hover {
+            background-color: #357ab7;
+        }
+
+        .chat-footer .fa-paper-plane {
+            font-size: 1.2em;
+        }
+
+        .chat-footer input[type="text"]::placeholder {
+            color: #aaa;
+        }
+
+        .chat-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-body::-webkit-scrollbar-thumb {
+            background-color: #d4d4d4;
+            border-radius: 5px;
+        }
+    </style>
+
+    <script>
+        function addMessage(type, message) {
+            const chatBody = document.getElementById("chat-body");
+            const messageElement = document.createElement("div");
+            messageElement.classList.add("message", type);
+
+            const contentElement = document.createElement("div");
+            contentElement.classList.add("content");
+            contentElement.textContent = message;
+
+            if (type === "bot") {
+                const iconElement = document.createElement("div");
+                iconElement.classList.add("icon");
+                iconElement.innerHTML = '<i class="fas fa-robot"></i>';
+                messageElement.appendChild(iconElement);
+            }
+
+            messageElement.appendChild(contentElement);
+            chatBody.appendChild(messageElement);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        function sendMessage() {
+            const messageInput = document.getElementById("message-input");
+            const message = messageInput.value.trim();
+            
+            if (message !== "") {
+                addMessage("user", message);
+                
+                // Realizar la solicitud POST al servidor
+                fetch("/get_response", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ message: message })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    addMessage("bot", data.response);
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    addMessage("bot", "Ocurrió un error, por favor intenta de nuevo.");
+                });
+                
+                messageInput.value = "";
+            } 
+        }
+    </script>
+
+{% endblock %}

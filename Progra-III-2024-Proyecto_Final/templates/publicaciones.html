@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplicación Vehículos</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+            color: #333;
+        }
+
+        .navbar {
+            background-color: #000;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .navbar img {
+            height: 40px;
+        }
+
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            margin-left: 1rem;
+            font-weight: bold;
+        }
+
+        .container {
+            margin-top: 2rem;
+        }
+
+        .title {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .form-section {
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-section h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .form-label {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .btn-custom {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 0.5rem 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn-custom:hover {
+            background-color: #555;
+        }
+
+        .image-preview {
+            width: 35%;
+            border-radius: 10px;
+            margin: 0 auto;
+            display: block;
+            margin-bottom: 1rem;
+        }
+
+        .brand-selection {
+            margin-top: 2rem;
+        }
+
+        .brand-selection .row {
+            display: flex;
+            justify-content: center;
+        }
+
+        .brand-selection .col-4 {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .brand-logo {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+        }
+
+        .brand-selection .brand {
+            text-align: center;
+            font-weight: bold;
+            margin-top: 0.5rem;
+        }
+
+        #map {
+            height: 250px; /* Tamaño más pequeño */
+            margin-top: 10px; /* Espacio entre el botón y el mapa */
+        }
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCO764uG2EnYUWrmDsgRwWSGPU51nRS1Nc"></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <img src="EllenImagen/Logo.png" alt="Logo">
+        <a href="#">WillyAutoMarketSV</a>
+    </nav>
+
+    <div class="container">
+        <div class="title">Nueva publicación</div>
+        <div class="row">
+            <div class="col-md-6 form-section">
+                <form id="frmPublicaciones" enctype="multipart/form-data">
+                    <div class="row mb-4">
+                        <label for="txtNombreVehiculo" class="col-12 form-label">Nombre del Vehículo</label>
+                        <div class="col-12">
+                            <input type="text" class="form-control" id="txtNombreVehiculo" name="txtNombreVehiculo" required>
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <label for="txtPrecio" class="col-12 form-label">Precio</label>
+                        <div class="col-12">
+                            <input type="text" class="form-control" id="txtPrecio" name="txtPrecio" required>
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <label for="txtDescripcion" class="col-12 form-label">Descripción</label>
+                        <div class="col-12">
+                            <input type="text" class="form-control" id="txtDescripcion" name="txtDescripcion" required>
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <label for="imgVehiculo" class="col-12 form-label">Imagen del Vehículo</label>
+                        <div class="col-12">
+                            <input type="file" class="form-control" id="imgVehiculo" name="imgVehiculo" accept="image/*" required>
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <label for="imgExtra" class="col-12 form-label">Otra Imagen</label>
+                        <div class="col-12">
+                            <input type="file" class="form-control" id="imgVehiculo2" name="imgVehiculo2" accept="image/*">
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <button type="button" class="btn btn-custom" onclick="agregarUbicacion()">Agregar Ubicación</button>
+                        </div>
+                    </div>
+                    <div id="map"></div> <!-- Mapa movido aquí -->
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-custom">Guardar</button>
+                    </div>
+                    <input type="hidden" id="latitud" name="latitud">
+                    <input type="hidden" id="longitud" name="longitud">
+                    <input type="hidden" id="maps_url" name="maps_url">
+                    <input type="hidden" id="map_image" name="map_image"> <!-- Campo oculto para la imagen del mapa -->
+                </form>
+            </div>
+            <div class="col-md-6 brand-selection">
+                <h2>Seleccione una marca</h2>
+                <div class="row">
+                    <div class="col-4">
+                        <img src="EllenImagen/Nissan.png" alt="Nissan" class="brand-logo">
+                        <div class="brand">NISSAN</div>
+                    </div>
+                    <div class="col-4">
+                        <img src="EllenImagen/BMW.svg.png" alt="BMW" class="brand-logo">
+                        <div class="brand">BMW</div>
+                    </div>
+                    <div class="col-4">
+                        <img src="EllenImagen/Toyota.png" alt="Toyota" class="brand-logo">
+                        <div class="brand">TOYOTA</div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <img src="EllenImagen/Honda.png" alt="Honda" class="brand-logo">
+                        <div class="brand">HONDA</div>
+                    </div>
+                    <div class="col-4">
+                        <img src="EllenImagen/PORSCHE.png" alt="Porsche" class="brand-logo">
+                        <div class="brand">PORSCHE</div>
+                    </div>
+                    <div class="col-4">
+                        <img src="EllenImagen/Hyundai.png" alt="Hyundai" class="brand-logo">
+                        <div class="brand">HYUNDAI</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let latitud, longitud, maps_url, map_image;
+        let map, marker;
+
+        function agregarUbicacion() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(position => {
+                    latitud = position.coords.latitude;
+                    longitud = position.coords.longitude;
+                    maps_url = `https://www.google.com/maps?q=${latitud},${longitud}`;
+
+                    // Generar la URL de la imagen del mapa
+                    map_image = `https://maps.googleapis.com/maps/api/staticmap?center=${latitud},${longitud}&zoom=15&size=400x200&maptype=roadmap&markers=color:red%7Clabel:S%7C${latitud},${longitud}&key=AIzaSyCO764uG2EnYUWrmDsgRwWSGPU51nRS1Nc`;
+
+                    // Guardar los valores en los campos ocultos
+                    document.getElementById('latitud').value = latitud;
+                    document.getElementById('longitud').value = longitud;
+                    document.getElementById('maps_url').value = maps_url;
+                    document.getElementById('map_image').value = map_image; // Guardar la imagen del mapa
+
+                    alert('Ubicación guardada:\n' + maps_url);
+
+                    // Mostrar la ubicación en el mapa
+                    mostrarMapa(latitud, longitud);
+                }, () => {
+                    alert('No se pudo obtener la ubicación.');
+                });
+            } else {
+                alert('Geolocalización no es soportada por este navegador.');
+            }
+        }
+
+        function mostrarMapa(lat, lng) {
+            const location = { lat: lat, lng: lng };
+
+            if (!map) {
+                map = new google.maps.Map(document.getElementById("map"), {
+                    zoom: 15,
+                    center: location,
+                });
+            } else {
+                map.setCenter(location);
+            }
+
+            if (marker) {
+                marker.setPosition(location);
+            } else {
+                marker = new google.maps.Marker({
+                    position: location,
+                    map: map,
+                });
+            }
+        }
+
+        document.getElementById('frmPublicaciones').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const formData = new FormData();
+
+            const imgVehiculo = document.getElementById('imgVehiculo');
+            const imgExtra = document.getElementById('imgVehiculo2');
+
+            formData.append('nombre_vehiculo', document.getElementById('txtNombreVehiculo').value);
+            formData.append('precio', document.getElementById('txtPrecio').value);
+            formData.append('descripcion', document.getElementById('txtDescripcion').value);
+            formData.append('imgVehiculo', imgVehiculo.files[0]);
+            if (imgExtra.files[0]) {
+                formData.append('imgVehiculo2', imgExtra.files[0]);
+            }
+            formData.append('latitud', document.getElementById('latitud').value);
+            formData.append('longitud', document.getElementById('longitud').value);
+            formData.append('maps_url', document.getElementById('maps_url').value);
+            formData.append('map_image', document.getElementById('map_image').value); // Añadir la imagen del mapa al formulario
+
+            fetch('/subir_publicacion', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    alert(data.msg);
+                    // Limpiar el formulario
+                    document.getElementById('frmPublicaciones').reset();
+                    // Resetear el mapa
+                    if (marker) {
+                        marker.setMap(null);
+                        marker = null;
+                    }
+                    map.setCenter({ lat: -34.397, lng: 150.644 }); // Reajustar el mapa a una ubicación por defecto
+                }
+            })
+            .catch(error => {
+                alert('Error al guardar la publicación: ' + error);
+            });
+        });
+    </script>
+</body>
+
+</html>

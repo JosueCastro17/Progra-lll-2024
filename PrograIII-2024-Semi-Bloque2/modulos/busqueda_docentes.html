@@ -1,0 +1,102 @@
+<form id="frmBusquedaDocente">
+    <div class="card text-bg-dark mb-3">
+        <div class="card-header">
+            <div class="d-flex">
+                Consulta de Docentes
+                <div class="ms-auto">
+                    <button type="button" data-form="busqueda_docentes" class="btn-close btn-close-white" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <!-- Caja de búsqueda -->
+            <div class="input-group mb-3">
+                <input type="text" id="inputBusquedaDocente" class="form-control" placeholder="Buscar por código, nombre o correo">
+                <button class="btn btn-outline-secondary" type="button" id="btnBuscarDocente">Buscar</button>
+            </div>
+            <table class="table table-hover" id="tblDocentes">
+                <thead>
+                    <tr>
+                        <th>CODIGO</th>
+                        <th>NOMBRE</th>
+                        <th>DIRECCION</th>
+                        <th>TEL</th>
+                        <th>CORREO</th>
+                        <th>DUI</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</form>
+
+<script>
+    /*
+    Función para buscar docentes por código, nombre o email
+    */
+    function buscarDocente() {
+        const busqueda = document.getElementById('inputBusquedaDocente').value.trim().toLowerCase();
+        
+        fetch('/docentes')
+        .then(res => res.json())
+        .then(data => {
+            // Filtramos los resultados según el valor de búsqueda
+            const resultados = data.filter(docente => 
+                docente.codigo.toLowerCase().includes(busqueda) || 
+                docente.nombre.toLowerCase().includes(busqueda) || 
+                docente.email.toLowerCase().includes(busqueda)
+            );
+            mostrarFilasDocentes(resultados);
+        })
+        .catch(err => console.log(err));
+    }
+
+    function eliminarDocente(idDocente){
+        if(confirm("¿Desea eliminar este registro?")){
+            let datos = {
+                accion : "eliminar",
+                idDocente,
+            };
+            enviarDatosDocente(datos);
+        }
+    }
+
+    function consultarDocentes(){
+        fetch('/docentes')
+        .then(res => res.json())
+        .then(data => {
+            mostrarFilasDocentes(data);
+        })
+        .catch(err => console.log(err));
+    }
+
+    function mostrarFilasDocentes(data = []){
+        let filas = '';
+        data.forEach(docente => {
+            filas += `
+                <tr onClick='modificarDocente(${JSON.stringify(docente)})'>
+                    <td>${docente.codigo}</td>
+                    <td>${docente.nombre}</td>
+                    <td>${docente.direccion}</td>
+                    <td>${docente.telefono}</td>
+                    <td>${docente.email}</td>
+                    <td>${docente.dui}</td>
+                    <td>
+                        <button type="button" class="btn btn-outline-danger" 
+                            onClick='eliminarDocente(${docente.idDocente})'>DEL
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+        document.querySelector('#tblDocentes > tbody').innerHTML = filas;
+    }
+
+    // Vinculamos el botón de buscar con la función de búsqueda
+    document.getElementById('btnBuscarDocente').addEventListener('click', buscarDocente);
+
+    // Consultamos todos los docentes al cargar la página
+    consultarDocentes();
+</script>

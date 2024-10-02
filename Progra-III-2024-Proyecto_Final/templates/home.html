@@ -1,0 +1,412 @@
+{% extends "Barra_Menu.html" %}
+
+{% block title %}Menu Principal{% endblock %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        .navbar {
+            background-color: #333;
+            color: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-right: 1rem;
+        }
+
+        .card {
+            background-color: rgba(0, 0, 0, 0.85);
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .top-section {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .images-container {
+            display: flex;
+            gap: 1rem;
+            flex: 2;
+        }
+
+        .images-container img {
+            width: 250px; /* Ajusta este valor para cambiar el ancho de las imagenes */
+            height: 200px; /* Ajusta este valor para cambiar la altura de las imagenes */
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .map-section h2{
+            flex: 1;
+            margin-left: -200px;
+            font-size: 15px;
+            
+            
+        }
+
+        .publicaciones-container {
+        margin-right: 50px; /* Ajusta el valor según el espacio que desees */
+
+    }
+
+        .map-section img {
+            width: 100%;
+            height: auto;
+            margin-right: 150px;
+            margin-left: -200px;
+            
+        }
+
+        .details-section {
+            margin-top: 1rem;
+        }
+
+        .like-button {
+            background-color: transparent;
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .like-button i {
+            font-size: 1.2rem;
+            margin-right: 5px;
+        }
+
+        .options-menu {
+            display: none;
+            position: absolute;
+            background-color: white;
+            color: black;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            z-index: 10;
+        }
+
+        .comment-options {
+            position: relative;
+        }
+
+        .fecha {
+            color: white;
+            font-size : 0.8rem;
+        }
+
+        .comment-section {
+            max-height: 240px; /* Ajusta la altura máxima a 4 comentarios */
+            overflow-y: auto;  /* Permite el desplazamiento vertical */
+            transition: max-height 0.3s ease; /* Suaviza el cambio de altura */
+            scrollbar-width: thin; /* Para navegadores Firefox */
+            scrollbar-color: transparent transparent; /* Para navegadores Firefox */
+            margin-right: 200px;
+        }
+
+        .comment-section::-webkit-scrollbar {
+            width: 8px; /* Ancho del scrollbar */
+        }
+
+        .comment-section::-webkit-scrollbar-thumb {
+            background: transparent; /* Color del thumb (barra de desplazamiento) */
+        }
+
+        .comment-section:hover::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.5); /* Color del thumb al pasar el mouse */
+        }
+    </style>
+</head>
+
+<body>
+  
+
+    <!-- Container -->
+    <div class="container mt-4" style="margin-left: 0; padding-left: 0;">
+
+        <div id="publicaciones-container"></div>
+    </div>
+
+   
+
+    <!-- Scripts -->
+    <script src="https://kit.fontawesome.com/a076d05399 .js"></script>
+
+    <script>
+        // Función para calcular el tiempo transcurrido en español
+        function tiempoTranscurrido(fecha) {
+            const ahora = new Date();
+            const fechaComentario = new Date(fecha);
+            const diferencia = ahora - fechaComentario;
+
+            const segundos = Math.floor(diferencia / 1000);
+            const minutos = Math.floor(segundos / 60);
+            const horas = Math.floor(minutos / 60);
+            const dias = Math.floor(horas / 24);
+
+            if (segundos < 60) {
+                return "hace un momento";
+            } else if (minutos < 60) {
+                return `hace ${minutos} minuto${minutos !== 1 ? 's' : ''}`;
+            } else if (horas < 24) {
+                return `hace ${horas} hora${horas !== 1 ? 's' : ''}`;
+            } else {
+                return `hace ${dias} día${dias !== 1 ? 's' : ''}`;
+            }
+        }
+
+        function agregarComentario(event, idPublicacion) {
+            event.preventDefault();
+            const comentario = document.getElementById(`comentario-${idPublicacion}`).value;
+
+            if (!comentario.trim()) {
+                alert('El comentario no puede estar vacío');
+                return;
+            }
+
+            const data = {
+                id_publicacion: idPublicacion,
+                comentario: comentario
+            };
+
+            fetch('/agregar_comentario', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Error en la respuesta del servidor');
+                return response.json();
+            })
+            .then(result => {
+                alert('Comentario agregado exitosamente');
+                location.reload(); // Recarga para mostrar el nuevo comentario
+            })
+            .catch(error => console.error('Error al enviar el comentario:', error));
+        }
+
+        function mostrarOpciones(event, idComentario) {
+            const menu = document.getElementById(`options-menu-${idComentario}`);
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+            event.stopPropagation();
+        }
+
+        function editarComentario(idComentario, comentario, idPublicacion) {
+            const textarea = document.getElementById(`comentario-${idPublicacion}`);
+            const botonComentar = document.getElementById(`boton-comentar-${idPublicacion}`);
+            const botonCancelar = document.getElementById(`boton-cancelar-${idPublicacion}`);
+
+            textarea.value = comentario;
+            botonComentar.textContent = 'Aceptar cambios';
+            botonCancelar.style.display = 'inline-block';
+
+            botonCancelar.onclick = function() {
+                textarea.value = '';
+                botonComentar.textContent = 'Comentar';
+                botonCancelar.style.display = 'none';
+            };
+
+            botonComentar.onclick = function(event) {
+                event.preventDefault();
+                const nuevoComentario = textarea.value;
+                if (nuevoComentario) {
+                    fetch('/editar_comentario', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            id_comentario: idComentario,
+                            nuevo_comentario: nuevoComentario
+                        })
+                    })
+                    .then(response => {
+                        if (!response.ok) throw new Error('Error en la respuesta del servidor');
+                        return response.json();
+                    })
+                    .then(result => {
+                        alert(result.msg);
+                        location.reload();
+                    })
+                    .catch(error => console.error('Error al editar el comentario:', error));
+                }
+            };
+        }
+
+        function eliminarComentario(idComentario) {
+            if (confirm("¿Estás seguro de que deseas eliminar este comentario?")) {
+                fetch('/eliminar_comentario', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ id_comentario: idComentario })
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Error en la respuesta del servidor');
+                    return response.json();
+                })
+                .then(result => {
+                    alert(result.msg);
+                    location.reload();
+                })
+                .catch(error => console.error('Error al eliminar el comentario:', error));
+            }
+        }
+
+        const likedStatus = {};
+
+function agregarLike(idPublicacion) {
+    // Alternar el estado de like para esta publicación
+    likedStatus[idPublicacion] = !likedStatus[idPublicacion]; // Si no existe, se considera como true
+
+    fetch(`/like/${idPublicacion}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ like_status: likedStatus[idPublicacion] })  // Envía el estado actualizado
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Error en la respuesta del servidor');
+        return response.json();
+    })
+    .then(result => {
+        const likesContador = document.getElementById(`likes-contador-${idPublicacion}`);
+        likesContador.textContent = result.total_likes;  // Actualiza el contador de likes
+
+        // Imprimir para depurar
+        console.log(`ID Publicación: ${idPublicacion}, Total Likes: ${result.total_likes}, Estado Like: ${likedStatus[idPublicacion]}`);
+
+        // Cambiar el estilo del botón según el estado
+        const likeButton = document.querySelector(`#like-button-${idPublicacion}`);
+        likeButton.classList.toggle('liked', likedStatus[idPublicacion]);  // Cambia el estilo según si está "liked"
+        
+    })
+    .catch(error => console.error('Error al agregar like:', error));
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    fetch('/get_publicaciones')
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('publicaciones-container');
+            container.innerHTML = '';
+            data.forEach(publi => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                const comentarios = publi.Comentarios ? publi.Comentarios.split('||') : [];
+                const idComentarios = publi.Id_Comentarios ? publi.Id_Comentarios.split('||') : [];
+                const fechas = publi.Fechas ? publi.Fechas.split('||') : [];
+
+                card.innerHTML = `
+                    <div class="card-body">
+                        <div class="top-section">
+                            <div class="images-container">
+                                <img src="/imagenes/${publi.imgVehiculo}" alt="${publi.nombre_vehiculo}" />
+                                <img src="/imagenes/${publi.imgVehiculo2}" alt="${publi.nombre_vehiculo}" />
+                            </div>
+                            <div class="map-section">
+                                <h2>Ubicación del vendedor</h2>
+                                <img src="${publi.map_image}" alt="Mapa de la ubicación">  <!-- Aquí se muestra map_image -->
+                            </div>
+                        </div>
+                        <div class="details-section">
+                            <p><strong>Publicado por:</strong> ${publi.NombreCompleto}</p>
+                            <p><strong>Marca del auto:</strong> ${publi.nombre_vehiculo}</p>
+                            <p><strong>Precio:</strong> ${publi.precio}</p>
+                            <p><strong>Descripción:</strong> ${publi.descripcion}</p>
+                        </div>
+                        <div class="comment-section" id="comentarios-${publi.Id_Publicacion}">
+                            <form onsubmit="agregarComentario(event, ${publi.Id_Publicacion})">
+                                <textarea id="comentario-${publi.Id_Publicacion}" class="form-control mb-2" rows="3" placeholder="Añadir un comentario..."></textarea>
+                                <button type="submit" id="boton-comentar-${publi.Id_Publicacion}" class="btn btn-primary">Comentar</button>
+                                <button type="button" id="boton-cancelar-${publi.Id_Publicacion}" class="btn btn-secondary" style="display: none;">Cancelar</button>
+                            </form>
+                            <p><strong>Comentarios:</strong></p>
+                            <div>
+                                ${comentarios.length > 0 ? comentarios.map((comentario, index) => `
+                                   <div class="comment-options" style="position: relative;">
+                                        ${comentario} <span class="fecha">(${tiempoTranscurrido(fechas[index])})</span>
+                                        <button class="btn btn-link" onclick="mostrarOpciones(event, ${idComentarios[index]})">...</button>
+                                        <div id="options-menu-${idComentarios[index]}" class="options-menu">
+                                            <button class="btn btn-danger" onclick="eliminarComentario(${idComentarios[index]})">Eliminar</button>
+                                            <button class="btn btn-secondary" onclick="editarComentario(${idComentarios[index]}, '${comentario}', ${publi.Id_Publicacion})">Editar</button>
+                                            
+                                        </div>
+                                    </div>
+                                `).join('') : '<p>No hay comentarios.</p>'}
+                            </div>
+                        </div>
+                        <button id="like-button-${publi.Id_Publicacion}" class="like-button" onclick="agregarLike(${publi.Id_Publicacion})">
+                            <i class="fas fa-heart"></i> <span id="likes-contador-${publi.Id_Publicacion}">${publi.total_likes}</span>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        })
+        .catch(error => console.error('Error al cargar publicaciones:', error));
+
+    document.addEventListener('click', () => {
+        const menus = document.querySelectorAll('.options-menu');
+        menus.forEach(menu => menu.style.display = 'none');
+        
+    });    
+});
+
+// Botón flotante para ir a publicaciones
+const botonFlotanteStyles = {
+    position: 'fixed',
+    bottom: '20px',
+    right: '20px',
+    backgroundColor: '#007bff',
+    color: 'white',
+    border: 'none',
+    borderRadius: '50%',
+    width: '60px',
+    height: '60px',
+    fontSize: '24px',
+    cursor: 'pointer',
+};
+const botonFlotante = document.createElement('button');
+Object.assign(botonFlotante.style, botonFlotanteStyles);
+botonFlotante.innerHTML = '<i class="fas fa-plus"></i>'; // Icono
+botonFlotante.onclick = () => window.location.href = '/publicaciones';
+document.body.appendChild(botonFlotante);
+
+</script>
+</body>
+</html>
+{% endblock %}

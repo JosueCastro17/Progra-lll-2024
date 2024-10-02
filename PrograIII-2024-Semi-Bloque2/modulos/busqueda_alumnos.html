@@ -1,0 +1,100 @@
+<form id="frmBusquedaAlumno">
+    <div class="card text-bg-dark mb-3">
+        <div class="card-header">
+            <div class="d-flex">
+                Consulta de Alumnos
+                <div class="ms-auto">
+                    <button type="button" data-form="busqueda_alumnos" class="btn-close btn-close-white" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <!-- Caja de búsqueda -->
+            <div class="input-group mb-3">
+                <input type="text" id="inputBusqueda" class="form-control" placeholder="Buscar por código, nombre o correo">
+                <button class="btn btn-outline-secondary" type="button" id="btnBuscar">Buscar</button>
+            </div>
+            <table class="table table-hover" id="tblAlumnos">
+                <thead>
+                    <tr>
+                        <th>CODIGO</th>
+                        <th>NOMBRE</th>
+                        <th>DIRECCION</th>
+                        <th>TEL</th>
+                        <th>CORREO</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</form>
+
+<script>
+    /*
+    Función para buscar alumnos por código, nombre o email
+    */
+    function buscarAlumno() {
+        const busqueda = document.getElementById('inputBusqueda').value.trim().toLowerCase();
+        
+        fetch('/alumnos')
+        .then(res => res.json())
+        .then(data => {
+            // Filtramos los resultados según el valor de búsqueda
+            const resultados = data.filter(alumno => 
+                alumno.codigo.toLowerCase().includes(busqueda) || 
+                alumno.nombre.toLowerCase().includes(busqueda) || 
+                alumno.email.toLowerCase().includes(busqueda)
+            );
+            mostrarFilasAlumnos(resultados);
+        })
+        .catch(err => console.log(err));
+    }
+
+    function eliminarAlumno(idAlumno){
+        if(confirm("¿Desea eliminar este registro?")){
+            let datos = {
+                accion : "eliminar",
+                idAlumno,
+            };
+            enviarDatosAlumno(datos);
+        }
+    }
+
+    function consultarAlumnos(){
+        fetch('/alumnos')
+        .then(res => res.json())
+        .then(data => {
+            mostrarFilasAlumnos(data);
+        })
+        .catch(err => console.log(err));
+    }
+
+    function mostrarFilasAlumnos(data = []){
+        let filas = '';
+        data.forEach(alumno => {
+            filas += `
+                <tr onClick='modificarAlumno(${JSON.stringify(alumno)})'>
+                    <td>${alumno.codigo}</td>
+                    <td>${alumno.nombre}</td>
+                    <td>${alumno.direccion}</td>
+                    <td>${alumno.telefono}</td>
+                    <td>${alumno.email}</td>
+                    <td>
+                        <button type="button" class="btn btn-outline-danger" 
+                            onClick='eliminarAlumno(${alumno.idAlumno})'>DEL
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+        document.querySelector('#tblAlumnos > tbody').innerHTML = filas;
+    }
+
+    // Vinculamos el botón de buscar con la función de búsqueda
+    document.getElementById('btnBuscar').addEventListener('click', buscarAlumno);
+
+    // Consultamos todos los alumnos al cargar la página
+    consultarAlumnos();
+</script>
