@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <script>
+        // Función para manejar el evento de login
+        function login() {
+            // Obtener los valores del usuario y la clave
+            const usuario = document.getElementById("usuario").value;
+            const clave = document.getElementById("clave").value;
+
+            // Verificar que los campos no estén vacíos
+            if (!usuario || !clave) {
+                alert("Por favor, ingresa el usuario y la clave.");
+                return;
+            }
+
+            // Crear el objeto con los datos del usuario
+            const datos = {
+                usuario: usuario,
+                clave: clave
+            };
+
+            // Realizar la solicitud POST al servidor
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(datos)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Redirigir a la página principal si el login es exitoso
+                    window.location.href = data.redirect;
+                } else {
+                    // Mostrar el mensaje de error recibido del servidor
+                    alert(data.message || "Ocurrió un error al intentar iniciar sesión.");
+                }
+            })
+            .catch(error => {
+                console.error("Error en la solicitud:", error);
+                alert("No se pudo conectar con el servidor.");
+            });
+        }
+
+        // Agregar el evento al botón de login
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("btnLogin").addEventListener("click", login);
+        });
+    </script>
+</head>
+<body>
+    <h1>Login</h1>
+    <input type="text" id="usuario" placeholder="Usuario" required>
+    <input type="password" id="clave" placeholder="Clave" required>
+    <button type="submit" id="btnLogin">Ingresar</button>
+</body>
+</html>
+

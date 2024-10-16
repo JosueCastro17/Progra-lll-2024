@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Don Micho</title>
+    <style>
+        button {
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .search-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .search-container input, .search-container button {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Formulario</h2>
+    <form id="FormularioPro" method="POST">
+        <input type="hidden" id="txtId" name="id">
+
+        <label for="usuario">Usuario:</label><br>
+        <input type="text" id="txtUsuario" name="usuario"><br>
+
+        <label for="clave">Clave:</label><br>
+        <input type="text" id="txtclave" name="clave"><br>
+
+        <label for="nombre">Nombre:</label><br>
+        <input type="text" id="txtnombre" name="nombre"><br>
+
+        <label for="direccion">Direccion:</label><br>
+        <input type="text" id="txtdireccion" name="direccion"><br>
+
+        <label for="telefono">Telefono:</label><br>
+        <input type="text" id="txttelefono" name="telefono"><br>
+
+        <button type="submit">Guardar</button><br><br>
+    </form>
+    <div class="search-container">
+        <input type="text" id="buscarProducto" placeholder="Buscar producto...">
+        <button type="button" onclick="buscarProducto()">Buscar</button>
+    </div>
+    <h2>Lista de Usuarios</h2>
+    <table id="tblMaterias">
+        <thead>
+            <tr>
+                <th>Usuario</th>
+                <th>Clave</th>
+                <th>Nombre</th>
+                <th>Direccion</th>
+                <th>Telefono</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+</body>
+<script>
+    document.querySelector('#FormularioPro').addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        if (!txtUsuario.value || !txtclave.value || !txtnombre.value || !txtdireccion.value || !txttelefono.value) {
+            alert('Todos los campos son obligatorios');
+            return;
+        }
+
+        let datos = {
+            id: txtId.value || null,
+            usuario: txtUsuario.value,
+            clave: txtclave.value,
+            nombre: txtnombre.value,
+            direccion: txtdireccion.value,
+            telefono: txttelefono.value
+        };
+
+        if (datos.id) {
+            modificarProducto(datos);
+        } else {
+            enviarDatos(datos);
+        }
+    });
+
+    function enviarDatos(datos) {
+        fetch('/principal', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(datos)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.msg === 'ok') {
+                alert('Usuario guardado exitosamente');
+                document.getElementById('FormularioPro').reset();
+                txtId.value = '';
+                consultarProductos();
+            } else {
+                alert('Hubo un problema al guardar el usuario');
+            }
+        })
+        .catch(err => console.log('Error:', err));
+    }
+
+    function modificarProducto(datos) {
+        fetch('/modificar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(datos)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.msg === 'ok') {
+                alert('Usuario modificado exitosamente');
+                document.getElementById('FormularioPro').reset();
+                txtId.value = '';
+                consultarProductos();
+            } else {
+                alert('Hubo un problema al modificar el usuario');
+            }
+        })
+        .catch(err => console.log('Error:', err));
+    }
+
+    function consultarProductos() {
+        fetch('/principal')
+        .then(res => res.json())
+        .then(data => {
+            mostrarFilasProductos(data);
+        })
+        .catch(err => console.log(err));
+    }
+
+    function mostrarFilasProductos(data = []) {
+        let filas = '';
+        data.forEach(Producto => {
+            filas += `
+                <tr>
+                    <td>${Producto.usuario}</td>
+                    <td>${Producto.clave}</td>
+                    <td>${Producto.nombre}</td>
+                    <td>${Producto.direccion}</td>
+                    <td>${Producto.telefono}</td>
+                    <td>
+                        <button type="button" onClick='eliminarProducto(${Producto.id})'>DEL</button>
+                        <button type="button" onClick='cargarProducto(${Producto.id})'>MOD</button>
+                    </td>
+                </tr>
+            `;
+        });
+        document.querySelector('#tblMaterias > tbody').innerHTML = filas;
+    }
+
+    function cargarProducto(id) {
+        fetch(`/principal?id=${id}`)
+        .then(res => res.json())
+        .then(producto => {
+            if (producto) {
+                txtId.value = producto.id;
+                txtUsuario.value = producto.usuario;
+                txtclave.value = producto.clave;
+                txtnombre.value = producto.nombre;
+                txtdireccion.value = producto.direccion;
+                txttelefono.value = producto.telefono;
+            }
+        })
+        .catch(err => console.log('Error:', err));
+    }
+
+    function eliminarProducto(id) {
+        fetch('/eliminar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ id: id })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.msg === 'ok') {
+                alert('Usuario eliminado exitosamente');
+                consultarProductos();
+            } else {
+                alert('Hubo un problema al eliminar el usuario');
+            }
+        })
+        .catch(err => console.log('Error:', err));
+    }
+
+    function buscarProducto() {
+        const filtro = document.getElementById('buscarProducto').value.toLowerCase();
+        const filas = document.querySelectorAll('#tblMaterias tbody tr');
+        filas.forEach(fila => {
+            const usuario = fila.cells[0].textContent.toLowerCase();
+            const clave = fila.cells[1].textContent.toLowerCase();
+            const nombre = fila.cells[2].textContent.toLowerCase();
+            const direccion = fila.cells[3].textContent.toLowerCase();
+            const telefono = fila.cells[4].textContent.toLowerCase();
+
+            if (usuario.includes(filtro) || clave.includes(filtro) || nombre.includes(filtro) ||
+                direccion.includes(filtro) || telefono.includes(filtro)) {
+                fila.style.display = '';
+            } else {
+                fila.style.display = 'none';
+            }
+        });
+    }
+
+    consultarProductos();
+</script>
+</html>

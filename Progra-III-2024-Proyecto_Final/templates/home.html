@@ -82,7 +82,7 @@
             height: auto;
             margin-right: 150px;
             margin-left: -200px;
-            
+            cursor: pointer; /* Agrega este estilo para cambiar el cursor */
         }
 
         .details-section {
@@ -143,7 +143,7 @@
 
         .comment-section:hover::-webkit-scrollbar-thumb {
             background: rgba(0, 0, 0, 0.5); /* Color del thumb al pasar el mouse */
-        }
+ }
     </style>
 </head>
 
@@ -339,7 +339,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             </div>
                             <div class="map-section">
                                 <h2>Ubicación del vendedor</h2>
-                                <img src="${publi.map_image}" alt="Mapa de la ubicación">  <!-- Aquí se muestra map_image -->
+                                <img id="map-image-${publi.Id_Publicacion}" src="${publi.map_image}" alt="Mapa de la ubicación">
                             </div>
                         </div>
                         <div class="details-section">
@@ -375,6 +375,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 `;
                 container.appendChild(card);
+                const mapImage = document.getElementById(`map-image-${publi.Id_Publicacion}`);
+                mapImage.addEventListener('click', () => {
+                    window.open(publi.maps_url, '_blank');
+                });
             });
         })
         .catch(error => console.error('Error al cargar publicaciones:', error));

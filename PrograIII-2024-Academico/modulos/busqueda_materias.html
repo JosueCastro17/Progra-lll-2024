@@ -1,0 +1,95 @@
+<form id="frmBusquedaMateria">
+    <div class="card text-bg-dark mb-3">
+        <div class="card-header">
+            <div class="d-flex">
+                Consulta de Materias
+                <div class="ms-auto">
+                    <button type="button" data-form="busqueda_materias" class="btn-close btn-close-white" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <!-- Caja de búsqueda -->
+            <div class="input-group mb-3">
+                <input type="text" id="inputBusquedaMateria" class="form-control" placeholder="Buscar por código o nombre">
+                <button class="btn btn-outline-secondary" type="button" id="btnBuscarMateria">Buscar</button>
+            </div>
+            <table class="table table-hover" id="tblMaterias">
+                <thead>
+                    <tr>
+                        <th>CODIGO</th>
+                        <th>NOMBRE</th>
+                        <th>UV</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</form>
+
+<script>
+    /*
+    Función para buscar materias por código o nombre
+    */
+    function buscarMateria() {
+        const busqueda = document.getElementById('inputBusquedaMateria').value.trim().toLowerCase();
+        
+        fetch('/materias')
+        .then(res => res.json())
+        .then(data => {
+            // Filtramos los resultados según el valor de búsqueda
+            const resultados = data.filter(materia => 
+                materia.codigo.toLowerCase().includes(busqueda) || 
+                materia.nombre.toLowerCase().includes(busqueda)
+            );
+            mostrarFilasMaterias(resultados);
+        })
+        .catch(err => console.log(err));
+    }
+
+    function eliminarMateria(idMateria){
+        if(confirm("¿Desea eliminar este registro?")){
+            let datos = {
+                accion : "eliminar",
+                idMateria,
+            };
+            enviarDatosMateria(datos);
+        }
+    }
+
+    function consultarMaterias(){
+        fetch('/materias')
+        .then(res => res.json())
+        .then(data => {
+            mostrarFilasMaterias(data);
+        })
+        .catch(err => console.log(err));
+    }
+
+    function mostrarFilasMaterias(data = []){
+        let filas = '';
+        data.forEach(materia => {
+            filas += `
+                <tr onClick='modificarMateria(${JSON.stringify(materia)})'>
+                    <td>${materia.codigo}</td>
+                    <td>${materia.nombre}</td>
+                    <td>${materia.uv}</td>
+                    <td>
+                        <button type="button" class="btn btn-outline-danger" 
+                            onClick='eliminarMateria(${materia.idMateria})'>DEL
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+        document.querySelector('#tblMaterias > tbody').innerHTML = filas;
+    }
+
+    // Vinculamos el botón de buscar con la función de búsqueda
+    document.getElementById('btnBuscarMateria').addEventListener('click', buscarMateria);
+
+    // Consultamos todas las materias al cargar la página
+    consultarMaterias();
+</script>
